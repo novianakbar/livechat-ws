@@ -400,22 +400,33 @@ func (w *WSManager) HandleNewMessage(msg domain.ChatMessage) {
 	}()
 
 	sessionID := msg.SessionID.String()
-	log.Printf("HandleNewMessage: SessionID=%s, SenderType=%s, Message=%s",
-		sessionID, msg.SenderType, msg.Message)
+	log.Printf("HandleNewMessage: SessionID=%s, SenderType=%s, Message=%s, ShowEscalation=%v",
+		sessionID, msg.SenderType, msg.Message, msg.ShowEscalationOffer)
 
 	// Broadcast new message to WebSocket clients in the session
+	data := map[string]interface{}{
+		"message_id":   msg.ID.String(),
+		"session_id":   sessionID,
+		"sender_id":    msg.SenderID,
+		"sender_type":  msg.SenderType,
+		"message":      msg.Message,
+		"message_type": msg.MessageType,
+		"attachments":  msg.Attachments,
+		"timestamp":    msg.CreatedAt.Format(time.RFC3339),
+	}
+
+	// Add escalation fields if present
+	if msg.ShowEscalationOffer {
+		data["show_escalation_offer"] = true
+		if msg.EscalationOfferMessage != "" {
+			data["escalation_offer_message"] = msg.EscalationOfferMessage
+		}
+		log.Printf("Including escalation offer in WebSocket message for session %s", sessionID)
+	}
+
 	wsMessage := domain.WebSocketResponse{
 		Type: "new_message",
-		Data: map[string]interface{}{
-			"message_id":   msg.ID.String(),
-			"session_id":   sessionID,
-			"sender_id":    msg.SenderID,
-			"sender_type":  msg.SenderType,
-			"message":      msg.Message,
-			"message_type": msg.MessageType,
-			"attachments":  msg.Attachments,
-			"timestamp":    msg.CreatedAt.Format(time.RFC3339),
-		},
+		Data: data,
 	}
 
 	w.broadcastToSession(sessionID, wsMessage)

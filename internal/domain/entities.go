@@ -7,16 +7,18 @@ import (
 )
 
 type ChatMessage struct {
-	ID          uuid.UUID  `json:"id"`
-	SessionID   uuid.UUID  `json:"session_id"`
-	SenderID    *uuid.UUID `json:"sender_id"`
-	SenderType  string     `json:"sender_type"`
-	Message     string     `json:"message"`
-	MessageType string     `json:"message_type"`
-	Attachments []string   `json:"attachments"`
-	ReadAt      *time.Time `json:"read_at"`
-	CreatedAt   time.Time  `json:"created_at"`
-	UpdatedAt   time.Time  `json:"updated_at"`
+	ID                     uuid.UUID  `json:"id"`
+	SessionID              uuid.UUID  `json:"session_id"`
+	SenderID               *uuid.UUID `json:"sender_id"`
+	SenderType             string     `json:"sender_type"`
+	Message                string     `json:"message"`
+	MessageType            string     `json:"message_type"`
+	Attachments            []string   `json:"attachments"`
+	ReadAt                 *time.Time `json:"read_at"`
+	CreatedAt              time.Time  `json:"created_at"`
+	UpdatedAt              time.Time  `json:"updated_at"`
+	ShowEscalationOffer    bool       `json:"show_escalation_offer"`
+	EscalationOfferMessage string     `json:"escalation_offer_message,omitempty"`
 }
 
 type TypingMessage struct {
