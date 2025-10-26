@@ -73,20 +73,24 @@ func main() {
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
-	go func() {
-		<-sigChan
-		log.Println("Shutting down...")
-		cancel()
-		if err := kafkaConsumer.Close(); err != nil {
-			log.Printf("Error closing Kafka consumer: %v", err)
-		}
-		if err := kafkaProducer.Close(); err != nil {
-			log.Printf("Error closing Kafka producer: %v", err)
-		}
-		if err := redisClient.Close(); err != nil {
-			log.Printf("Error closing Redis client: %v", err)
-		}
-	}()
+	   go func() {
+		   <-sigChan
+		   log.Println("Shutting down...")
+		   cancel()
+		   if err := server.Shutdown(); err != nil {
+			   log.Printf("Error shutting down server: %v", err)
+		   }
+		   if err := kafkaConsumer.Close(); err != nil {
+			   log.Printf("Error closing Kafka consumer: %v", err)
+		   }
+		   if err := kafkaProducer.Close(); err != nil {
+			   log.Printf("Error closing Kafka producer: %v", err)
+		   }
+		   if err := redisClient.Close(); err != nil {
+			   log.Printf("Error closing Redis client: %v", err)
+		   }
+		   os.Exit(0)
+	   }()
 
 	log.Printf("Starting Kafka consumer and WebSocket server...")
 
